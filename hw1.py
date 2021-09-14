@@ -3,12 +3,15 @@
 # Compares the training errors of various features on a given dataset.
 #
 # By        : Leomar Durán <https://github.com/lduran2/>
-# When      : 2021-09-13t22:24
+# When      : 2021-09-13t22:34
 # For       : CIS 4526
-# Version   : 1.2
+# Version   : 1.2.2
 #
 # Changelog :
-#     v1.2 - 2021-09-13t22:24
+#     v1.2.2 - 2021-09-13t22:34
+#         calculating probability for each feature as error
+#
+#     v1.2.1 - 2021-09-13t22:24
 #         now counting the rows for the number of samples
 #
 #     v1.1 - 2021-09-13t21:53
@@ -54,10 +57,14 @@ def main_arg(arg):
         attr_train_favorable = [0] * num_attr
 
         # find number of favorable outcomes
+        L = 0
         for row in reader:
             # count this row
             num_examples = (num_examples + 1)
-            # print(row)
+            # count every favorable feature
+            for k, name in enumerate(attr_names):
+                attr_train_favorable[k] = attr_train_favorable[k] + int(row[name])
+            # end for k, name in enumerate(attr_names)
         # end for row in reader
 
         # Compute accuracy for each feature
@@ -72,3 +79,4 @@ def main_arg(arg):
 
 if (__name__ == "__main__"):
     main()
+# end if (__name__ == "__main__")
