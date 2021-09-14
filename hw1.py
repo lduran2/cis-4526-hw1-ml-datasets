@@ -5,9 +5,12 @@
 # By        : Leomar Durán <https://github.com/lduran2/>
 # When      : 2021-09-13t22:34
 # For       : CIS 4526
-# Version   : 1.2.2
+# Version   : 1.2.3
 #
 # Changelog :
+#     v1.2.3 - 2021-09-13t23:11
+#         calculating the average rate of failure as error properly
+#
 #     v1.2.2 - 2021-09-13t22:34
 #         calculating probability for each feature as error
 #
@@ -49,26 +52,32 @@ def main_arg(arg):
         # place a dictionary reader on it
         reader = csv.DictReader(csvfile)
         # read in the first row of fields
-        attr_names = reader.fieldnames
+        fields = reader.fieldnames
+        # dictionaries are ordered in Python 3.6,
+        # so we can just slice off the result field
+        attr_names = fields[:-1]
+        label = fields[-1]
         # get the number of features
         num_attr = len(attr_names)
 
-        # initialize favorable examples at 0
-        attr_train_favorable = [0] * num_attr
+        # absolute error (before dividing by number of examples)
+        attr_train_err_abs = [0] * num_attr
 
-        # find number of favorable outcomes
-        L = 0
+        # find the absolute errors
         for row in reader:
             # count this row
             num_examples = (num_examples + 1)
-            # count every favorable feature
+            # count every absolute error
             for k, name in enumerate(attr_names):
-                attr_train_favorable[k] = attr_train_favorable[k] + int(row[name])
+                # does the current feature fail the test?
+                curr_fail = (row[name] != row[label])
+                # accumulate the fails
+                attr_train_err_abs[k] = (attr_train_err_abs[k] + curr_fail)
             # end for k, name in enumerate(attr_names)
         # end for row in reader
 
         # Compute accuracy for each feature
-        attr_train_err = [(fav/(num_examples + 1)) for fav in attr_train_favorable]
+        attr_train_err = [(err_abs/num_examples) for err_abs in attr_train_err_abs]
     # end with open(arg) as csvfile
 
     # Print out the results
