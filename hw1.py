@@ -3,11 +3,14 @@
 # Compares the training errors of various features on a given dataset.
 #
 # By        : Leomar Durán <https://github.com/lduran2/>
-# When      : 2021-09-13t22:34
+# When      : 2021-09-13t23:29
 # For       : CIS 4526
-# Version   : 1.2.3
+# Version   : 1.3
 #
 # Changelog :
+#     v1.3 - 2021-09-13t23:29
+#         uses the first row as a control row for non-numerical data
+#
 #     v1.2.3 - 2021-09-13t23:11
 #         calculating the average rate of failure as error properly
 #
@@ -45,9 +48,6 @@ def main_arg(arg):
     '''
     # open the CSV file
     with open(arg) as csvfile:
-        # initialize number of examples at 0
-        num_examples = 0
-
         # Read input file and save attribute names
         # place a dictionary reader on it
         reader = csv.DictReader(csvfile)
@@ -60,8 +60,14 @@ def main_arg(arg):
         # get the number of features
         num_attr = len(attr_names)
 
+        # create control using row data 1
+        control = next(reader)
+
+        # initialize to 1s because first row as control is all passes
         # absolute error (before dividing by number of examples)
-        attr_train_err_abs = [0] * num_attr
+        attr_train_err_abs = [1] * num_attr
+        # number of examples
+        num_examples = 1
 
         # find the absolute errors
         for row in reader:
@@ -70,7 +76,9 @@ def main_arg(arg):
             # count every absolute error
             for k, name in enumerate(attr_names):
                 # does the current feature fail the test?
-                curr_fail = (row[name] != row[label])
+                bin_feature = (row[name] == control[name])
+                bin_label = (row[label] == control[label])
+                curr_fail = (bin_feature != bin_label)
                 # accumulate the fails
                 attr_train_err_abs[k] = (attr_train_err_abs[k] + curr_fail)
             # end for k, name in enumerate(attr_names)
